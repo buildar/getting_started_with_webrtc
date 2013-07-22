@@ -16,11 +16,11 @@ This is a basic web page that connects a Caller and a Callee via a Web Socket si
 
 webrtc_signal_server.js
 -----------------------
-This is a node.js based script that provides Web server and Web Socket server functionality required to support the example html based WebRTC applications.
+This is a node.js based script that provides Web server and Web Socket server functionality required to support the video_call_with_chat_and_file_sharing.html based WebRTC application.
 
 This requires the "websocket" package that can be installed from the command line by typing "npm install websocket".
 
-To start this server from the command line simply type "node basic_signal_server.js" then point your browser at http://localhost:1234
+To start this server from the command line simply type "node webrtc_signal_server.js" then point your browser at http://localhost:1234
 You can replace localhost with any ip address you like and you can replace 1234 with any port you like too.
 
 NOTE: It is important that the ip address you use here is also accessible by the other person you want to join your call.
