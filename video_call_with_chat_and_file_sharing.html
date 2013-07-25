@@ -34,6 +34,7 @@
 var webrtc_capable = true;
 var rtc_peer_connection = null;
 var rtc_session_description = null;
+var rtc_ice_candidate = null
 var get_user_media = null;
 var connect_stream_to_src = null;
 var stun_server = "stun.l.google.com:19302";
@@ -41,6 +42,7 @@ var stun_server = "stun.l.google.com:19302";
 if (navigator.getUserMedia) { // WebRTC 1.0 standard compliant browser
   rtc_peer_connection = RTCPeerConnection;
   rtc_session_description = RTCSessionDescription;
+  rtc_ice_candidate = RTCIceCandidate;
   get_user_media = navigator.getUserMedia.bind(navigator);
   connect_stream_to_src = function(media_stream, media_element) {
     // https://www.w3.org/Bugs/Public/show_bug.cgi?id=21606
@@ -50,6 +52,7 @@ if (navigator.getUserMedia) { // WebRTC 1.0 standard compliant browser
 } else if (navigator.mozGetUserMedia) { // early firefox webrtc implementation
   rtc_peer_connection = mozRTCPeerConnection;
   rtc_session_description = mozRTCSessionDescription;
+  rtc_ice_candidate = mozRTCIceCandidate;
   get_user_media = navigator.mozGetUserMedia.bind(navigator);
   connect_stream_to_src = function(media_stream, media_element) {
     media_element.mozSrcObject = media_stream;
@@ -59,6 +62,7 @@ if (navigator.getUserMedia) { // WebRTC 1.0 standard compliant browser
 } else if (navigator.webkitGetUserMedia) { // early webkit webrtc implementation
   rtc_peer_connection = webkitRTCPeerConnection;
   rtc_session_description = RTCSessionDescription;
+  rtc_ice_candidate = RTCIceCandidate;
   get_user_media = navigator.webkitGetUserMedia.bind(navigator);
   connect_stream_to_src = function(media_stream, media_element) {
     media_element.src = webkitURL.createObjectURL(media_stream);
@@ -237,7 +241,7 @@ function caller_signal_handler(event) {
     );
   } else if (signal.type === "new_ice_candidate") {
     peer_connection.addIceCandidate(
-      new RTCIceCandidate(signal.candidate)
+      new rtc_ice_candidate(signal.candidate)
     );
   } else if (signal.type === "new_description") {
     peer_connection.setRemoteDescription(
@@ -270,7 +274,7 @@ function callee_signal_handler(event) {
   var signal = JSON.parse(event.data);
   if (signal.type === "new_ice_candidate") {
     peer_connection.addIceCandidate(
-      new RTCIceCandidate(signal.candidate)
+      new rtc_ice_candidate(signal.candidate)
     );
   } else if (signal.type === "new_description") {
     peer_connection.setRemoteDescription(
