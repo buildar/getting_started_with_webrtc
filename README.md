@@ -23,5 +23,5 @@ This requires the "websocket" package that can be installed from the command lin
 To start this server from the command line simply type "node webrtc_signal_server.js" then point your browser at http://localhost:1234
 You can replace localhost with any ip address you like and you can replace 1234 with any port you like too.
 
-NOTE: It is important that the ip address you use here is also accessible by the other person you want to join your call.
+NOTE: It is important that the ip address you use here is also accessible by the other person you want to join your call, at least via NAT/STUN (e.g. not 127.0.0.1).
 
