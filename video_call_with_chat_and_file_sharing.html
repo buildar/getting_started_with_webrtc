@@ -67,6 +67,7 @@ if (navigator.getUserMedia) { // WebRTC 1.0 standard compliant browser
   get_user_media = navigator.webkitGetUserMedia.bind(navigator);
   connect_stream_to_src = function(media_stream, media_element) {
     media_element.src = webkitURL.createObjectURL(media_stream);
+    media_element.play();
   };
 } else {
   alert("This browser does not support WebRTC - visit WebRTC.org for more info");
