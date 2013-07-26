@@ -1,7 +1,7 @@
 getting_started_with_webrtc
 ===========================
 
-Example code to help you get started creating WebRTC applications
+Example code to help you get started creating your own WebRTC applications. This application is designed to help you quickly and easily work out how WebRTC works under the hood and is written with a focus on readability. It is designed to make the Offer/Answer call setup process less opaque than the example code provided in the WebRTC API specification documents. It is not intended as a WebRTC API wrapper that hides all the complexity under a high level abstraction. Instead it provides a fully working example application with video calls, text chat and drag and drop file sharing.  It is the perfect launch point for anyone who wants to start developing their own WebRTC application and in the process really learn how the WebRTC API and signaling works.
 
 For a full description of how all this code works and other examples described in more details see "Getting started with WebRTC" by Rob Manson, published by Packt Publishing (http://www.packtpub.com/).
 
