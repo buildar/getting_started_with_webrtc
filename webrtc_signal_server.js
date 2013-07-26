@@ -110,8 +110,8 @@ websocket_server.on("request", function(request) {
     }
   });
   
-  connection.on("close", function(connection) {
-    log_comment("connection closed ("+connection.remoteAddress+")");    
+  connection.on("close", function(reason_code, description) {
+    log_comment("connection closed ("+this.remoteAddress+" - "+reason_code+" - "+description+")");
     Object.keys(webrtc_discussions).forEach(function(token) {
       Object.keys(webrtc_discussions[token]).forEach(function(id) {
         if (id === connection.id) {
