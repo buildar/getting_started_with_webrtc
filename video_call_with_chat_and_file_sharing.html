@@ -129,7 +129,7 @@ function start() {
     }
   };
 
-  // display remote video streams when they arrive using local <video> MediaElement
+  // display remote video streams when they arrive using remote_video <video> MediaElement
   peer_connection.onaddstream = function (event) {
     connect_stream_to_src(event.stream, document.getElementById("remote_video"));
     // hide placeholder and show remote video
@@ -337,6 +337,8 @@ function setup_video() {
     function (local_stream) { // success callback
       // display preview from the local camera & microphone using local <video> MediaElement
       connect_stream_to_src(local_stream, document.getElementById("local_video"));
+      // mute local video to prevent feedback
+      document.getElementById("local_video").muted = true;
       // add local camera stream to peer_connection ready to be sent to the remote peer
       peer_connection.addStream(local_stream);
     },
