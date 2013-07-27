@@ -107,6 +107,7 @@ var call_token; // unique token for this call
 var signaling_server; // signaling server for this call
 var peer_connection; // peer connection object
 var file_store = []; // shared file storage
+var local_stream_added = false;
 
 function start() {
   // create the WebRTC peer connection object
@@ -118,6 +119,7 @@ function start() {
 
   // generic handler that sends any ice candidates to the other peer
   peer_connection.onicecandidate = function (ice_event) {
+    console.log("new ice candidate");
     if (ice_event.candidate) {
       signaling_server.send(
         JSON.stringify({
@@ -131,9 +133,11 @@ function start() {
 
   // display remote video streams when they arrive using remote_video <video> MediaElement
   peer_connection.onaddstream = function (event) {
+    console.log("new remote stream added");
     connect_stream_to_src(event.stream, document.getElementById("remote_video"));
     // hide placeholder and show remote video
     document.getElementById("loading_state").style.display = "none";
+    console.log("updating UI to open_call_state");
     document.getElementById("open_call_state").style.display = "block";
   };
 
@@ -141,9 +145,11 @@ function start() {
   setup_video();
 
   // setup generic connection to the signaling server using the WebSocket API
+  console.log("setting up connection to signaling server");
   signaling_server = new WebSocket("ws://localhost:1234");
 
   if (document.location.hash === "" || document.location.hash === undefined) { // you are the Caller
+    console.log("you are the Caller");
 
     // create the unique token for this call 
     var token = Date.now()+"-"+Math.round(Math.random()*10000);
@@ -157,6 +163,7 @@ function start() {
       signaling_server.onmessage = caller_signal_handler;
 
       // tell the signaling server you have joined the call 
+      console.log("sending 'join' signal for call token:"+call_token);
       signaling_server.send(
         JSON.stringify({ 
           token:call_token,
@@ -166,9 +173,11 @@ function start() {
     }
 
     document.title = "You are the Caller";
+    console.log("updating UI to loading_state");
     document.getElementById("loading_state").innerHTML = "Ready for a call...ask your friend to visit:<br/><br/>"+document.location;
 
   } else { // you have a hash fragment so you must be the Callee 
+    console.log("you are the Callee");
     
     // get the unique token for this call from location.hash
     call_token = document.location.hash;
@@ -178,6 +187,7 @@ function start() {
       signaling_server.onmessage = callee_signal_handler;
 
       // tell the signaling server you have joined the call 
+      console.log("sending 'join' signal for call token:"+call_token);
       signaling_server.send(
         JSON.stringify({ 
           token:call_token,
@@ -186,6 +196,7 @@ function start() {
       );
 
       // let the caller know you have arrived so they can start the call
+      console.log("sending 'callee_arrived' signal for call token:"+call_token);
       signaling_server.send(
         JSON.stringify({ 
           token:call_token,
@@ -195,6 +206,7 @@ function start() {
     }
 
     document.title = "You are the Callee";
+    console.log("updating UI to loading_state");
     document.getElementById("loading_state").innerHTML = "One moment please...connecting your call...";
   }
 
@@ -236,11 +248,9 @@ function new_description_created(description) {
 // handle signals as a caller
 function caller_signal_handler(event) {
   var signal = JSON.parse(event.data);
+  console.log(signal.type);
   if (signal.type === "callee_arrived") {
-    peer_connection.createOffer(
-      new_description_created, 
-      log_error
-    );
+    create_offer();
   } else if (signal.type === "new_ice_candidate") {
     peer_connection.addIceCandidate(
       new rtc_ice_candidate(signal.candidate)
@@ -270,10 +280,25 @@ function caller_signal_handler(event) {
     // extend with your own signal types here
   }
 }
+function create_offer() {
+  if (local_stream_added) {
+    console.log("creating offer");
+    peer_connection.createOffer(
+      new_description_created, 
+      log_error
+    );
+  } else {
+    console.log("local stream has not been added yet - delaying creating offer");
+    setTimeout(function() {
+      create_offer();
+    }, 1000);
+  }
+}
 
 // handle signals as a callee
 function callee_signal_handler(event) {
   var signal = JSON.parse(event.data);
+  console.log(signal.type);
   if (signal.type === "new_ice_candidate") {
     peer_connection.addIceCandidate(
       new rtc_ice_candidate(signal.candidate)
@@ -283,7 +308,7 @@ function callee_signal_handler(event) {
       new rtc_session_description(signal.sdp), 
       function () {
         if (peer_connection.remoteDescription.type == "offer") {
-          peer_connection.createAnswer(new_description_created, log_error);
+          create_answer();
         }
       },
       log_error
@@ -301,6 +326,17 @@ function callee_signal_handler(event) {
     update_file_progress(signal.id, file_store[signal.id].file.parts.length, signal.length);
   } else {
     // extend with your own signal types here
+  }
+}
+function create_answer() {
+  if (local_stream_added) {
+    console.log("creating answer");
+    peer_connection.createAnswer(new_description_created, log_error);
+  } else {
+    console.log("local stream has not been added yet - delaying creating answer");
+    setTimeout(function() {
+      create_answer();
+    }, 1000);
   }
 }
 
@@ -329,6 +365,7 @@ function send_chat_message(e) {
 
 // setup stream from the local camera 
 function setup_video() {
+  console.log("setting up local video stream");
   get_user_media(
     { 
       "audio": true, // request access to local microphone
@@ -336,11 +373,14 @@ function setup_video() {
     }, 
     function (local_stream) { // success callback
       // display preview from the local camera & microphone using local <video> MediaElement
+      console.log("new local stream added");
       connect_stream_to_src(local_stream, document.getElementById("local_video"));
       // mute local video to prevent feedback
       document.getElementById("local_video").muted = true;
       // add local camera stream to peer_connection ready to be sent to the remote peer
+      console.log("local stream added to peer_connection to send to remote peer");
       peer_connection.addStream(local_stream);
+      local_stream_added = true;
     },
     log_error
   );
