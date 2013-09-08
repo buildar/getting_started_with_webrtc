@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+/*
+
+  image_processing_pipeline.js by Rob Manson (buildAR.com)
+
+    This code is designed to help you explore how the Video/Canvas processing
+    pipeline works. 
+
+    The coding style is focused on clearly describing the concepts and is not 
+    designed to be used as production code.
+
+    The key concepts covered are:
+    - the Canvas/Video pipeline
+    - Array Buffers vs Views
+    - efficient frame buffer processing using multiple Views
+
+    HINT:
+    Search for "example:" to find useful examples below.
+
+
+  The MIT License
+
+  Copyright (c) 2013 Rob Manson, http://buildAR.com. All rights reserved.
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  THE SOFTWARE.
+ 
+*/
+
+///////////////////////////////////////////////
+/*          EDIT BELOW TO EXPERIMENT          */
+///////////////////////////////////////////////
+
+// setup variables
+var pipeline_processor_speed = 20; // processor iterations per second
+var pipeline_scale = 1;  // scale within the canvas
+var pipeline_width = 300*pipeline_scale;
+var pipeline_height = 150*pipeline_scale;
+
+// setup frame buffer processor
+// - called "pipeline_processor_speed" times per second by pipeline_callback()
+// - this is the easiest place for you to start exploring
+function make_grayscale(pipeline_image_data) {
+  // allow us to turn the processor on and off
+  if (pipeline_grayscale_flag) {
+    // create a view where each item is a 4 byte RGBA pixel
+    var pixels = new Uint32Array(pipeline_image_data.data.buffer);
+    // create a view where each item is an 8 bit channel
+    var channels = new Uint8ClampedArray(pipeline_image_data.data.buffer);
+    // walk through all the pixels
+    for (var pixel in pixels) {
+      // get the channel item id for this pixel
+      var channel_id = 4*pixel;
+
+      // get RGBA channels
+      var r = channels[ channel_id+0 ];
+      var g = channels[ channel_id+1 ];
+      var b = channels[ channel_id+2 ];
+      var a = channels[ channel_id+3 ];
+
+      // calculate the average of all three RGB values
+      var rgb_avg = (r+g+b)/3;
+
+      // subtract the rgb_avg from 255
+      //rgb_avg = 255-rgb_avg; // example: invert
+
+      // update all three channels to the average
+      channels[ channel_id+0 ] = rgb_avg; //+ 30; // example: sepia tone
+      channels[ channel_id+1 ] = rgb_avg;
+      channels[ channel_id+2 ] = rgb_avg;
+
+      // add random noise to the alpha channel
+      //channels[ channel_id+3 ] = Math.round(Math.random()*255); // example: random alpha noise
+    }
+    // draw the update image data back into the canvas
+    pipeline_ctx.putImageData(pipeline_image_data, 0, 0);
+  }
+}
+
+
+///////////////////////////////////////////////
+/*        EDITING BELOW IS OPTIONAL          */
+///////////////////////////////////////////////
+
+var pipeline_canvas = undefined;
+var pipeline_ctx = undefined;
+var pipeline_video = undefined;
+var pipeline_interval = undefined;
+var pipeline_grayscale_flag = false;
+
+// start the whole process by getting a stream
+function start() {  // called by body.onload
+  get_stream(document.getElementById("pipeline_canvas"));
+}
+
+// get a video stream
+function get_stream(canvas) {
+  pipeline_canvas = canvas;
+  pipeline_ctx = pipeline_canvas.getContext("2d");
+  var options = { video:true, audio:false };
+  get_user_media(options, create_vc_pipeline, got_error);
+  function got_error(error) {
+    console.log(error);
+  }
+}
+
+// create a Video/Canvas MediaStream pipeline
+function create_vc_pipeline(stream) {
+  pipeline_video = document.createElement("video");
+  connect_stream_to_src(stream, pipeline_video);
+  start_pipeline();
+}
+
+// create other types of Stream pipelines would go here
+
+// start the pipeline processor
+function start_pipeline() {
+  pipeline_interval = setInterval(function() {
+      pipeline_callback();
+    }, 
+    1000/pipeline_processor_speed
+  );
+}
+
+// pipeline processor callback 
+function pipeline_callback() {
+  if (pipeline_ctx && pipeline_video) {
+    pipeline_ctx.drawImage(pipeline_video, 0, 0, pipeline_width, pipeline_height);
+    make_grayscale(pipeline_ctx.getImageData(0, 0, pipeline_width, pipeline_height)); // process frame 
+    //console.log(pipeline_video.currentTime); // example: how to log video timestamps
+  }
+}
+
+// toggle grayscale mode
+function toggle_grayscale() {
+  pipeline_grayscale_flag = !pipeline_grayscale_flag;
+}
+
+// stop the pipeline processor
+function stop_pipeline() {
+  clearInterval(pipeline_interval);
+}
+
+
+///////////////////////////////////////////////
+/*           GENERIC GUM POLY FILL           */
+///////////////////////////////////////////////
+
+// setup get_user_media polyfill
+var get_user_media = null;
+var connect_stream_to_src = null;
+var browser_type = null; 
+if (navigator.getUserMedia) { // WebRTC 1.0 standard compliant browser
+  get_user_media = navigator.getUserMedia.bind(navigator);
+  connect_stream_to_src = function(media_stream, media_element) {
+    media_element.srcObject = media_stream;
+    media_element.play();
+  };
+  browser_type = "webrtc";
+} else if (navigator.mozGetUserMedia) { // early firefox webrtc implementation
+  get_user_media = navigator.mozGetUserMedia.bind(navigator);
+  connect_stream_to_src = function(media_stream, media_element) {
+    media_element.mozSrcObject = media_stream;
+    media_element.play();
+  };
+  browser_type = "firefox";
+} else if (navigator.webkitGetUserMedia) { // early webkit webrtc implementation
+  get_user_media = navigator.webkitGetUserMedia.bind(navigator);
+  connect_stream_to_src = function(media_stream, media_element) {
+    media_element.src = webkitURL.createObjectURL(media_stream);
+    media_element.play();
+  };
+  browser_type = "webkit";
+} else {
+  alert("This browser does not support WebRTC - visit WebRTC.org for more info");
+}
+
+</script>
+<style>
+#pipeline_canvas {
+  /* scale whole canvas here */
+  width: 1024px;
+  height: 768px;
+  background-color: #FF0000;
+}
+</style>
+</head>
+<body onload="start()">
+<p><canvas id="pipeline_canvas"></canvas></p>
+<p><a href="#void" onClick="toggle_grayscale()">TOGGLE FILTER</a></p>
+</body>
+</html>
