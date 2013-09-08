@@ -25,9 +25,12 @@ You can replace localhost with any ip address you like and you can replace 1234 
 
 NOTE: It is important that the ip address you use here is also accessible by the other person you want to join your call, at least via NAT/STUN (e.g. not 127.0.0.1).
 
+Extras
+======
+
 image_processing_pipeline.html
 ------------------------------
-This code is designed to help you explore how the Video/Canvas processing pipeline works. The coding style is focused on clearly describing the concepts and is not  designed to be used as production code.
+This code is designed to help you explore how the Video/Canvas processing pipeline works. The coding style is focused on clearly describing the concepts and is not designed to be used as production code.
 
 The key concepts covered are:
 - the Canvas/Video pipeline
