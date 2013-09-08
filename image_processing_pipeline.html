@@ -13,7 +13,7 @@
     designed to be used as production code.
 
     The key concepts covered are:
-    - the Canvas/Video pipeline
+    - the Video/Canvas pipeline
     - Array Buffers vs Views
     - efficient frame buffer processing using multiple Views
 
@@ -59,6 +59,13 @@ var pipeline_height = 150*pipeline_scale;
 // - pipeline_callback() calls this function "pipeline_processor_speed" times per second
 function example_processor(pipeline_image_data) {
 
+  // Key concept: Array Buffers vs Array Buffer Views
+  // Think of Buffers as long strings of bits
+  // Think of Typed Arrays as Views into the Buffers
+  // You can create Views in a specific format
+  // You can create Views for a specific range
+  // By using Views on top of a shared Buffer you reduce "copy" overhead
+
   // allow us to turn the processor on and off
   if (pipeline_grayscale_flag) {
 
@@ -67,6 +74,10 @@ function example_processor(pipeline_image_data) {
 
     // create a view where each item is an 8 bit channel
     var channels = new Uint8ClampedArray(pipeline_image_data.data.buffer);
+
+    // Key concept: efficient frame buffer processing using multiple Views
+    // Both pixels and channels use the same underlying Buffer but fold the bits
+    // into different ways of seeing that data
 
     // walk through all the pixels
     for (var pixel in pixels) {
@@ -129,13 +140,20 @@ function get_stream(canvas) {
 
 // create a Video/Canvas MediaStream pipeline
 function create_vc_pipeline(stream) {
+
+  // Key concept: Video/Canvas MediaStream processing pipeline
+  // The Video/Canvas pipeline allows you to connect a stream in one end
+  // and have it regularly output image_data objects at the other end
   pipeline_video = document.createElement("video");
   connect_stream_to_src(stream, pipeline_video);
   start_pipeline();
 }
 
 // create other types of Stream pipelines here
-// ...
+// ...Image Capture...
+// function create_ic_pipeline(stream) { ... }
+// ...Recording...
+// function create_r_pipeline(stream) { ... }
 
 // start the pipeline processor
 function start_pipeline() {
@@ -154,6 +172,7 @@ function pipeline_callback() {
     pipeline_ctx.drawImage(pipeline_video, 0, 0, pipeline_width, pipeline_height);
     example_processor(pipeline_ctx.getImageData(0, 0, pipeline_width, pipeline_height)); // process frame 
     //console.log(pipeline_video.currentTime); // example: how to log video timestamps
+    // example: integrate other sensor data with timestamps here
   }
 }
 
