@@ -104,6 +104,17 @@ function example_processor(pipeline_image_data) {
 
       // add random noise to the alpha channel
       //channels[ a ] = Math.round(Math.random()*255); // example: random alpha noise
+
+      // chroma key 1 - make greener things transparent 
+      //if (channels[ g ] > channels[ r ] && channels[ g ] > channels[ b ]) {
+      //  channels[ a ] = 0; // example: make this transparent
+      //}
+
+      // chroma key 2 - make darker things transparent 
+      //if (channels[ r ] < 75 && channels[ g ] < 75 && channels[ g ] < 75) {
+      //  channels[ a ] = 0; // example: make this transparent
+      //}
+
     }
 
     // draw the update image data back into the canvas
