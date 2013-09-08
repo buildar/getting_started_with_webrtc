@@ -56,8 +56,7 @@ var pipeline_width = 300*pipeline_scale;
 var pipeline_height = 150*pipeline_scale;
 
 // setup frame buffer processor
-// - called "pipeline_processor_speed" times per second by pipeline_callback()
-// - this is the easiest place for you to start exploring
+// - pipeline_callback() calls this function "pipeline_processor_speed" times per second
 function example_processor(pipeline_image_data) {
 
   // allow us to turn the processor on and off
@@ -76,24 +75,24 @@ function example_processor(pipeline_image_data) {
       var channel_id = 4*pixel;
 
       // get RGBA channels
-      var r = channels[ channel_id+0 ];
-      var g = channels[ channel_id+1 ];
-      var b = channels[ channel_id+2 ];
-      var a = channels[ channel_id+3 ];
+      var r = channel_id+0;
+      var g = channel_id+1;
+      var b = channel_id+2;
+      var a = channel_id+3;
 
       // calculate the average of all three RGB values
-      var rgb_avg = (r+g+b)/3;
+      var rgb_avg = (channels[ r ] + channels[ g ] + channels[ b ]) / 3;
 
       // subtract the rgb_avg from 255
       //rgb_avg = 255-rgb_avg; // example: invert
 
       // update all three channels to the average
-      channels[ channel_id+0 ] = rgb_avg; //+ 30; // example: sepia tone
-      channels[ channel_id+1 ] = rgb_avg;
-      channels[ channel_id+2 ] = rgb_avg;
+      channels[ r ] = rgb_avg; //+ 30; // example: sepia tone
+      channels[ g ] = rgb_avg;
+      channels[ b ] = rgb_avg;
 
       // add random noise to the alpha channel
-      //channels[ channel_id+3 ] = Math.round(Math.random()*255); // example: random alpha noise
+      //channels[ a ] = Math.round(Math.random()*255); // example: random alpha noise
     }
 
     // draw the update image data back into the canvas
@@ -135,10 +134,13 @@ function create_vc_pipeline(stream) {
   start_pipeline();
 }
 
-// create other types of Stream pipelines would go here
+// create other types of Stream pipelines here
+// ...
 
 // start the pipeline processor
 function start_pipeline() {
+  // NOTE: You may prefer to use requestAnimationFrame() or setTimeout() here as needed
+  //       setInterval() has been used in this demo for it's simplicity
   pipeline_interval = setInterval(function() {
       pipeline_callback();
     }, 
