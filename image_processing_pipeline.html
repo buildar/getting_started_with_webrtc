@@ -58,15 +58,20 @@ var pipeline_height = 150*pipeline_scale;
 // setup frame buffer processor
 // - called "pipeline_processor_speed" times per second by pipeline_callback()
 // - this is the easiest place for you to start exploring
-function make_grayscale(pipeline_image_data) {
+function example_processor(pipeline_image_data) {
+
   // allow us to turn the processor on and off
   if (pipeline_grayscale_flag) {
+
     // create a view where each item is a 4 byte RGBA pixel
     var pixels = new Uint32Array(pipeline_image_data.data.buffer);
+
     // create a view where each item is an 8 bit channel
     var channels = new Uint8ClampedArray(pipeline_image_data.data.buffer);
+
     // walk through all the pixels
     for (var pixel in pixels) {
+
       // get the channel item id for this pixel
       var channel_id = 4*pixel;
 
@@ -90,6 +95,7 @@ function make_grayscale(pipeline_image_data) {
       // add random noise to the alpha channel
       //channels[ channel_id+3 ] = Math.round(Math.random()*255); // example: random alpha noise
     }
+
     // draw the update image data back into the canvas
     pipeline_ctx.putImageData(pipeline_image_data, 0, 0);
   }
@@ -144,7 +150,7 @@ function start_pipeline() {
 function pipeline_callback() {
   if (pipeline_ctx && pipeline_video) {
     pipeline_ctx.drawImage(pipeline_video, 0, 0, pipeline_width, pipeline_height);
-    make_grayscale(pipeline_ctx.getImageData(0, 0, pipeline_width, pipeline_height)); // process frame 
+    example_processor(pipeline_ctx.getImageData(0, 0, pipeline_width, pipeline_height)); // process frame 
     //console.log(pipeline_video.currentTime); // example: how to log video timestamps
   }
 }
