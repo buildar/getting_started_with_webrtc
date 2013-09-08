@@ -33,7 +33,7 @@ image_processing_pipeline.html
 This code is designed to help you explore how the Video/Canvas processing pipeline works. The coding style is focused on clearly describing the concepts and is not designed to be used as production code.
 
 The key concepts covered are:
-- the Canvas/Video pipeline
+- the Video/Canvas pipeline
 - Array Buffers vs Views
 - efficient frame buffer processing using multiple Views
 
