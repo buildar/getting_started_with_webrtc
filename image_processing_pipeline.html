@@ -67,7 +67,7 @@ function example_processor(pipeline_image_data) {
   // By using Views on top of a shared Buffer you reduce "copy" overhead
 
   // allow us to turn the processor on and off
-  if (pipeline_grayscale_flag) {
+  if (pipeline_filter_on) {
 
     // create a view where each item is a 4 byte RGBA pixel
     var pixels = new Uint32Array(pipeline_image_data.data.buffer);
@@ -131,7 +131,7 @@ var pipeline_canvas = undefined;
 var pipeline_ctx = undefined;
 var pipeline_video = undefined;
 var pipeline_interval = undefined;
-var pipeline_grayscale_flag = false;
+var pipeline_filter_on = false;
 
 // start the whole process by getting a stream
 function start() {  // called by body.onload
@@ -201,9 +201,9 @@ function pipeline_callback() {
   }
 }
 
-// toggle grayscale mode
-function toggle_grayscale() {
-  pipeline_grayscale_flag = !pipeline_grayscale_flag;
+// toggle filter on/off 
+function toggle_filter() {
+  pipeline_filter_on = !pipeline_filter_on;
 }
 
 // stop the pipeline processor
@@ -257,6 +257,6 @@ if (navigator.getUserMedia) { // WebRTC 1.0 standard compliant browser
 </head>
 <body onload="start()">
 <p><canvas id="pipeline_canvas"></canvas></p>
-<p><a href="#void" onClick="toggle_grayscale()">TOGGLE FILTER</a> <-- View the source of this page to see what this does (HINT: search for "Key concept:" and "example:" to get started)</p>
+<p><a href="#void" onClick="toggle_filter()">TOGGLE FILTER</a> <-- View the source of this page to see what this does (HINT: search for "Key concept:" and "example:" to get started)</p>
 </body>
 </html>
