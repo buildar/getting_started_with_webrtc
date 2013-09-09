@@ -50,10 +50,10 @@
 ///////////////////////////////////////////////
 
 // setup variables
-var pipeline_processor_speed = 20; // processor iterations per second
-var pipeline_scale = 1;  // scale within the canvas
-var pipeline_width = 300*pipeline_scale;
-var pipeline_height = 150*pipeline_scale;
+var pipeline_processor_speed = 30; // processor iterations per second
+var pipeline_width = 320;
+var pipeline_height = 240;
+
 
 // setup frame buffer processor
 // - pipeline_callback() calls this function "pipeline_processor_speed" times per second
@@ -141,8 +141,22 @@ function start() {  // called by body.onload
 // get a video stream
 function get_stream(canvas) {
   pipeline_canvas = canvas;
+  pipeline_canvas.width = pipeline_width; // set this otherwise it defaults to 300
+  pipeline_canvas.height = pipeline_height; // set this otherwise it defaults to 150
   pipeline_ctx = pipeline_canvas.getContext("2d");
-  var options = { video:true, audio:false };
+  var options = { 
+    video:{
+      mandatory: {
+        width: { min: pipeline_width },
+        height: { min: pipeline_height }
+      },
+      //optional: [
+      //  { frameRate: 60 },
+      //  { facingMode: "user" }
+      //]
+    }     , 
+    audio:false 
+  };
   get_user_media(options, create_vc_pipeline, got_error);
   function got_error(error) {
     console.log(error);
@@ -235,7 +249,7 @@ if (navigator.getUserMedia) { // WebRTC 1.0 standard compliant browser
 <style>
 #pipeline_canvas {
   /* scale whole canvas here */
-  width: 1024px;
+  width:  1024px;
   height: 768px;
   background-color: #FF0000;
 }
