@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="sdp_session_manager.js"></script>
+</head>
+<body>
+View source for the secret sauce! 8)
+</body>
+<script>
+/*
+  The MIT License
+
+  Copyright (c) 2013 Rob Manson, http://buildAR.com. All rights reserved.
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  THE SOFTWARE.
+ 
+
+  This is a rough example page so you can quickly get started exploring how 
+  to manipulate SDP based WebRTC sessions through javascript.
+
+  None of this code deals with the actual sending/adding of SDP to any of 
+  the peers.
+
+  This code simply handles the parsing, manipulation and rendering of SDP.
+
+  All feedback and discussion about the structure of the Javascript Object 
+  Model that represents the session is welcome.
+
+  All pull requests that improve the parsing and rendering is very welcome 8)
+
+
+  usage examples
+  ==============
+  
+  basic usage
+  -----------
+  var sdp_sm = new sdp_session_manager(); 
+  var session = sdp_sm.parse_sdp(sdp);
+  var sdp_out = sdp_sm.render_sdp(session);
+
+  NOTE: sdp should == sdp_out
+  
+  hold
+  ----
+  var sdp_sm = new sdp_session_manager(); 
+  var session = sdp_sm.parse_sdp(sdp);
+  sdp_sm.hold(0); // media stream 1
+  sdp_sm.hold(1); // media stream 2 (as relevant based on the sdp you choose)
+  sdp_sm.render_sdp(session);
+
+  unhold
+  ------
+  var sdp_sm = new sdp_session_manager(); 
+  var session = sdp_sm.parse_sdp(sdp);
+  sdp_sm.unhold(0, "sendrcv"); // media stream 1
+  sdp_sm.unhold(1, "sendrcv"); // media stream 2
+  sdp_sm.render_sdp(session);
+
+  list rtp formats 
+  ----------------
+  var sdp_sm = new sdp_session_manager(); 
+  var session = sdp_sm.parse_sdp(sdp);
+  sdp_sm.list_rtp_formats(1);
+
+*/
+
+// here's some random sdp examples for quick testing
+var sdp = "v=0\r\no=- 2738925626739154476 3 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE audio video\r\na=msid-semantic: WMS 5AbKYRUGTe9roRp2Vb84bKnRtXNPW2FQxmoK\r\nm=audio 38703 RTP/SAVPF 111 103 104 0 8 107 106 105 13 126\r\nc=IN IP4 120.158.143.205\r\na=rtcp:38703 IN IP4 120.158.143.205\r\na=candidate:2845767988 1 udp 2113937151 10.194.79.1 55430 typ host generation 0\r\na=candidate:2845767988 2 udp 2113937151 10.194.79.1 55430 typ host generation 0\r\na=candidate:328666875 1 udp 2113937151 172.20.10.2 42137 typ host generation 0\r\na=candidate:328666875 2 udp 2113937151 172.20.10.2 42137 typ host generation 0\r\na=candidate:3133702446 1 udp 1845501695 120.158.143.205 38703 typ srflx raddr 172.20.10.2 rport 42137 generation 0\r\na=candidate:3133702446 2 udp 1845501695 120.158.143.205 38703 typ srflx raddr 172.20.10.2 rport 42137 generation 0\r\na=candidate:12678881 1 udp 1845501695 120.158.143.205 41500 typ srflx raddr 10.194.79.1 rport 55430 generation 0\r\na=candidate:12678881 2 udp 1845501695 120.158.143.205 41500 typ srflx raddr 10.194.79.1 rport 55430 generation 0\r\na=candidate:3877438916 1 tcp 1509957375 10.194.79.1 0 typ host generation 0\r\na=candidate:3877438916 2 tcp 1509957375 10.194.79.1 0 typ host generation 0\r\na=candidate:1561653771 1 tcp 1509957375 172.20.10.2 0 typ host generation 0\r\na=candidate:1561653771 2 tcp 1509957375 172.20.10.2 0 typ host generation 0\r\na=ice-ufrag:E2hbRMG2uTrfTOGG\r\na=ice-pwd:1ToUWZN+zmosFQ5NKRMMZpAw\r\na=ice-options:google-ice\r\na=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level\r\na=sendrecv\r\na=mid:audio\r\na=rtcp-mux\r\na=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:iqLbGf04Kf+AYqol9X809bUrW0gKoRm28s8XyewL\r\na=rtpmap:111 opus/48000/2\r\na=fmtp:111 minptime=10\r\na=rtpmap:103 ISAC/16000\r\na=rtpmap:104 ISAC/32000\r\na=rtpmap:0 PCMU/8000\r\na=rtpmap:8 PCMA/8000\r\na=rtpmap:107 CN/48000\r\na=rtpmap:106 CN/32000\r\na=rtpmap:105 CN/16000\r\na=rtpmap:13 CN/8000\r\na=rtpmap:126 telephone-event/8000\r\na=maxptime:60\r\na=ssrc:2225430392 cname:XVx5MwI/mG7gpwKS\r\na=ssrc:2225430392 msid:5AbKYRUGTe9roRp2Vb84bKnRtXNPW2FQxmoK 5AbKYRUGTe9roRp2Vb84bKnRtXNPW2FQxmoKa0\r\na=ssrc:2225430392 mslabel:5AbKYRUGTe9roRp2Vb84bKnRtXNPW2FQxmoK\r\na=ssrc:2225430392 label:5AbKYRUGTe9roRp2Vb84bKnRtXNPW2FQxmoKa0\r\nm=video RTP/SAVPF 100 116 117\r\nc=IN IP4 120.158.143.205\r\na=rtcp:38703 IN IP4 120.158.143.205\r\na=candidate:2845767988 1 udp 2113937151 10.194.79.1 55430 typ host generation 0\r\na=candidate:2845767988 2 udp 2113937151 10.194.79.1 55430 typ host generation 0\r\na=candidate:328666875 1 udp 2113937151 172.20.10.2 42137 typ host generation 0\r\na=candidate:328666875 2 udp 2113937151 172.20.10.2 42137 typ host generation 0\r\na=candidate:3133702446 1 udp 1845501695 120.158.143.205 38703 typ srflx raddr 172.20.10.2 rport 42137 generation 0\r\na=candidate:3133702446 2 udp 1845501695 120.158.143.205 38703 typ srflx raddr 172.20.10.2 rport 42137 generation 0\r\na=candidate:12678881 1 udp 1845501695 120.158.143.205 41500 typ srflx raddr 10.194.79.1 rport 55430 generation 0\r\na=candidate:12678881 2 udp 1845501695 120.158.143.205 41500 typ srflx raddr 10.194.79.1 rport 55430 generation 0\r\na=candidate:3877438916 1 tcp 1509957375 10.194.79.1 0 typ host generation 0\r\na=candidate:3877438916 2 tcp 1509957375 10.194.79.1 0 typ host generation 0\r\na=candidate:1561653771 1 tcp 1509957375 172.20.10.2 0 typ host generation 0\r\na=candidate:1561653771 2 tcp 1509957375 172.20.10.2 0 typ host generation 0\r\na=ice-ufrag:E2hbRMG2uTrfTOGG\r\na=ice-pwd:1ToUWZN+zmosFQ5NKRMMZpAw\r\na=ice-options:google-ice\r\na=extmap:2 urn:ietf:params:rtp-hdrext:toffset\r\na=sendrecv\r\na=mid:video\r\na=rtcp-mux\r\na=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:iqLbGf04Kf+AYqol9X809bUrW0gKoRm28s8XyewL\r\na=rtpmap:100 VP8/90000\r\na=rtcp-fb:100 ccm fir\r\na=rtcp-fb:100 nack \r\na=rtcp-fb:100 goog-remb \r\na=rtpmap:116 red/90000\r\na=rtpmap:117 ulpfec/90000\r\na=ssrc:2357739379 cname:XVx5MwI/mG7gpwKS\r\na=ssrc:2357739379 msid:5AbKYRUGTe9roRp2Vb84bKnRtXNPW2FQxmoK 5AbKYRUGTe9roRp2Vb84bKnRtXNPW2FQxmoKv0\r\na=ssrc:2357739379 mslabel:5AbKYRUGTe9roRp2Vb84bKnRtXNPW2FQxmoK\r\na=ssrc:2357739379 label:5AbKYRUGTe9roRp2Vb84bKnRtXNPW2FQxmoKv0\r\n";
+
+var sdp2 = "v=0\r\no=- 187493392 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE audio video\r\na=msid-semantic: WMS lCvU2FlLeBhVSlbp5e1G7fb2YsLceBMcEHnl\r\nm=audio 1 RTP/SAVPF 103 104 111 0 8 107 106 105 13 126\r\nc=IN IP4 0.0.0.0\r\na=rtcp:1 IN IP4 0.0.0.0\r\na=ice-ufrag:6hI+d5BB2RJZI7Cf\r\na=ice-pwd:GXys/5SsiKlnq1ZhMTXkVClJ\r\na=ice-options:google-ice\r\na=sendrecv\r\na=mid:audio\r\na=rtcp-mux\r\na=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:wM6Rdi8wPHauGtSRcU2t0iT49Imyqj6pPddGC0tj\r\na=rtpmap:103 ISAC/16000\r\na=rtpmap:104 ISAC/32000\r\na=rtpmap:111 opus/48000/2\r\na=rtpmap:0 PCMU/8000\r\na=rtpmap:8 PCMA/8000\r\na=rtpmap:107 CN/48000\r\na=rtpmap:106 CN/32000\r\na=rtpmap:105 CN/16000\r\na=rtpmap:13 CN/8000\r\na=rtpmap:126 telephone-event/8000\r\na=ssrc:4253239662 cname:Bu0o4VhmGvXNnRzp\r\na=ssrc:4253239662 msid:lCvU2FlLeBhVSlbp5e1G7fb2YsLceBMcEHnl a0\r\na=ssrc:4253239662 mslabel:lCvU2FlLeBhVSlbp5e1G7fb2YsLceBMcEHnl\r\na=ssrc:4253239662 label:lCvU2FlLeBhVSlbp5e1G7fb2YsLceBMcEHnla0\r\nm=video 1 RTP/SAVPF 100 116 117\r\nc=IN IP4 0.0.0.0\r\na=rtcp:1 IN IP4 0.0.0.0\r\na=ice-ufrag:6hI+d5BB2RJZI7Cf\r\na=ice-pwd:GXys/5SsiKlnq1ZhMTXkVClJ\r\na=ice-options:google-ice\r\na=sendrecv\r\na=mid:video\r\na=rtcp-mux\r\na=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:wM6Rdi8wPHauGtSRcU2t0iT49Imyqj6pPddGC0tj\r\na=rtpmap:100 VP8/90000\r\na=rtpmap:116 red/90000\r\na=rtpmap:117 ulpfec/90000\r\na=ssrc:2756695341 cname:Bu0o4VhmGvXNnRzp\r\na=ssrc:2756695341 msid:lCvU2FlLeBhVSlbp5e1G7fb2YsLceBMcEHnl v0\r\na=ssrc:2756695341 mslabel:lCvU2FlLeBhVSlbp5e1G7fb2YsLceBMcEHnl\r\na=ssrc:2756695341 label:lCvU2FlLeBhVSlbp5e1G7fb2YsLceBMcEHnlv0\r\n";
+
+var sdp3 = "v=0\r\no=- 2738925626739154476 3 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE audio video\r\na=msid-semantic: WMS 5AbKYRUGTe9roRp2Vb84bKnRtXNPW2FQxmoK\r\nm=audio 38703 RTP/SAVPF 111 103 104 0 8 107 106 105 13 126\r\nc=IN IP4 120.158.143.205\r\na=rtcp:38703 IN IP4 120.158.143.205\r\na=candidate:2845767988 1 udp 2113937151 10.194.79.1 55430 typ host generation 0\r\na=candidate:2845767988 2 udp 2113937151 10.194.79.1 55430 typ host generation 0\r\na=candidate:328666875 1 udp 2113937151 172.20.10.2 42137 typ host generation 0\r\na=candidate:328666875 2 udp 2113937151 172.20.10.2 42137 typ host generation 0\r\na=candidate:3133702446 1 udp 1845501695 120.158.143.205 38703 typ srflx raddr 172.20.10.2 rport 42137 generation 0\r\na=candidate:3133702446 2 udp 1845501695 120.158.143.205 38703 typ srflx raddr 172.20.10.2 rport 42137 generation 0\r\na=candidate:12678881 1 udp 1845501695 120.158.143.205 41500 typ srflx raddr 10.194.79.1 rport 55430 generation 0\r\na=candidate:12678881 2 udp 1845501695 120.158.143.205 41500 typ srflx raddr 10.194.79.1 rport 55430 generation 0\r\na=candidate:3877438916 1 tcp 1509957375 10.194.79.1 0 typ host generation 0\r\na=candidate:3877438916 2 tcp 1509957375 10.194.79.1 0 typ host generation 0\r\na=candidate:1561653771 1 tcp 1509957375 172.20.10.2 0 typ host generation 0\r\na=candidate:1561653771 2 tcp 1509957375 172.20.10.2 0 typ host generation 0\r\na=ice-ufrag:E2hbRMG2uTrfTOGG\r\na=ice-pwd:1ToUWZN+zmosFQ5NKRMMZpAw\r\na=ice-options:google-ice\r\na=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level\r\na=sendrecv\r\na=mid:audio\r\na=rtcp-mux\r\na=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:iqLbGf04Kf+AYqol9X809bUrW0gKoRm28s8XyewL\r\na=rtpmap:111 opus/48000/2\r\na=fmtp:111 minptime=10\r\na=rtpmap:103 ISAC/16000\r\na=rtpmap:104 ISAC/32000\r\na=rtpmap:0 PCMU/8000\r\na=rtpmap:8 PCMA/8000\r\na=rtpmap:107 CN/48000\r\na=rtpmap:106 CN/32000\r\na=rtpmap:105 CN/16000\r\na=rtpmap:13 CN/8000\r\na=rtpmap:126 telephone-event/8000\r\na=maxptime:60\r\na=ssrc:2225430392 cname:XVx5MwI/mG7gpwKS\r\na=ssrc:2225430392 msid:5AbKYRUGTe9roRp2Vb84bKnRtXNPW2FQxmoK 5AbKYRUGTe9roRp2Vb84bKnRtXNPW2FQxmoKa0\r\na=ssrc:2225430392 mslabel:5AbKYRUGTe9roRp2Vb84bKnRtXNPW2FQxmoK\r\na=ssrc:2225430392 label:5AbKYRUGTe9roRp2Vb84bKnRtXNPW2FQxmoKa0\r\nm=video 38703 RTP/SAVPF 100 116 117\r\nc=IN IP4 120.158.143.205\r\na=rtcp:38703 IN IP4 120.158.143.205\r\na=candidate:2845767988 1 udp 2113937151 10.194.79.1 55430 typ host generation 0\r\na=candidate:2845767988 2 udp 2113937151 10.194.79.1 55430 typ host generation 0\r\na=candidate:328666875 1 udp 2113937151 172.20.10.2 42137 typ host generation 0\r\na=candidate:328666875 2 udp 2113937151 172.20.10.2 42137 typ host generation 0\r\na=candidate:3133702446 1 udp 1845501695 120.158.143.205 38703 typ srflx raddr 172.20.10.2 rport 42137 generation 0\r\na=candidate:3133702446 2 udp 1845501695 120.158.143.205 38703 typ srflx raddr 172.20.10.2 rport 42137 generation 0\r\na=candidate:12678881 1 udp 1845501695 120.158.143.205 41500 typ srflx raddr 10.194.79.1 rport 55430 generation 0\r\na=candidate:12678881 2 udp 1845501695 120.158.143.205 41500 typ srflx raddr 10.194.79.1 rport 55430 generation 0\r\na=candidate:3877438916 1 tcp 1509957375 10.194.79.1 0 typ host generation 0\r\na=candidate:3877438916 2 tcp 1509957375 10.194.79.1 0 typ host generation 0\r\na=candidate:1561653771 1 tcp 1509957375 172.20.10.2 0 typ host generation 0\r\na=candidate:1561653771 2 tcp 1509957375 172.20.10.2 0 typ host generation 0\r\na=ice-ufrag:E2hbRMG2uTrfTOGG\r\na=ice-pwd:1ToUWZN+zmosFQ5NKRMMZpAw\r\na=ice-options:google-ice\r\na=extmap:2 urn:ietf:params:rtp-hdrext:toffset\r\na=sendrecv\r\na=mid:video\r\na=rtcp-mux\r\na=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:iqLbGf04Kf+AYqol9X809bUrW0gKoRm28s8XyewL\r\na=rtpmap:100 VP8/90000\r\na=rtcp-fb:100 ccm fir\r\na=rtcp-fb:100 nack \r\na=rtcp-fb:100 goog-remb \r\na=rtpmap:116 red/90000\r\na=rtpmap:117 ulpfec/90000\r\na=ssrc:2357739379 cname:XVx5MwI/mG7gpwKS\r\na=ssrc:2357739379 msid:5AbKYRUGTe9roRp2Vb84bKnRtXNPW2FQxmoK 5AbKYRUGTe9roRp2Vb84bKnRtXNPW2FQxmoKv0\r\na=ssrc:2357739379 mslabel:5AbKYRUGTe9roRp2Vb84bKnRtXNPW2FQxmoK\r\na=ssrc:2357739379 label:5AbKYRUGTe9roRp2Vb84bKnRtXNPW2FQxmoKv0\r\n";
+
+var sdp4 = "v=0\r\no=Mozilla-SIPUA-24.0a1 8779 0 IN IP4 0.0.0.0\r\ns=SIP Call\r\nt=0 0\r\na=ice-ufrag:390cc303\r\na=ice-pwd:02de074e065bea46807d82ff2a6f08c7\r\na=fingerprint:sha-256 2A:42:CD:9C:E9:F0:51:81:8F:51:99:E8:12:D6:E9:DE:5C:E6:74:DF:64:88:0A:82:0D:5A:91:10:79:05:4A:51\r\nm=audio 38045 RTP/SAVPF 109 0 8 101\r\nc=IN IP4 192.168.22.44\r\na=rtpmap:109 opus/48000/2\r\na=ptime:20\r\na=rtpmap:0 PCMU/8000\r\na=rtpmap:8 PCMA/8000\r\na=rtpmap:101 telephone-event/8000\r\na=fmtp:101 0-15\r\na=sendrecv\r\na=candidate:0 1 UDP 2112356607 192.168.22.44 38045 typ host\r\na=candidate:0 2 UDP 2112356606 192.168.22.44 42635 typ host\r\nm=video 52194 RTP/SAVPF 120\r\nc=IN IP4 192.168.22.44\r\na=rtpmap:120 VP8/90000\r\na=sendrecv\r\na=candidate:0 1 UDP 2112356607 192.168.22.44 52194 typ host\r\na=candidate:0 2 UDP 2112356606 192.168.22.44 42608 typ host\r\n";
+
+var sdp5 = "v=0\r\no=Mozilla-SIPUA 13445 0 IN IP4 0.0.0.0\r\ns=SIP Call\r\nt=0 0\r\na=ice-ufrag:fce5ed7d\r\na=ice-pwd:236c73310fcf2a40d4a3c873bbcb55c0\r\na=fingerprint:sha-256 6D:D8:B3:8F:67:48:84:59:E4:57:9E:07:38:79:3A:9B:51:A1:8A:5D:D6:B8:B7:AF:52:39:B6:61:73:84:2A:04\r\nm=audio 39256 RTP/SAVPF 109 101\r\nc=IN IP4 192.168.22.58\r\na=rtpmap:109 opus/48000/2\r\na=ptime:20\r\na=rtpmap:101 telephone-event/8000\r\na=fmtp:101 0-15\r\na=sendrecv\r\na=candidate:0 1 UDP 2113601791 192.168.22.58 39256 typ host\r\na=candidate:0 2 UDP 2113601790 192.168.22.58 57517 typ host\r\nm=video 53285 RTP/SAVPF 120\r\nc=IN IP4 192.168.22.58\r\na=rtpmap:120 VP8/90000\r\na=sendrecv\r\na=candidate:0 1 UDP 2113601791 192.168.22.58 53285 typ host\r\na=candidate:0 2 UDP 2113601790 192.168.22.58 50349 typ host\r\n";
+</script>
+</html>
