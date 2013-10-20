@@ -37,3 +37,10 @@ The key concepts covered are:
 - Array Buffers vs Views
 - efficient frame buffer processing using multiple Views
 
+sdp_session_manager.js & sdp_session_manager.html
+-------------------------------------------------
+This is a parser/renderer and example page designed to help you quickly get started exploring how to manipulate SDP based WebRTC sessions through javascript. None of this code deals with the actual sending/adding of SDP to any of the peers. This code simply handles the parsing, manipulation and rendering of SDP.
+
+All feedback and discussion about the structure of the Javascript Object Model that represents the session is welcome.
+
+All pull requests that improve the parsing and rendering is very welcome 8)
