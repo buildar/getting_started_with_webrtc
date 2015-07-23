@@ -10,7 +10,7 @@ var fs = require("fs");
 var websocket = require("websocket").server;
 
 // general variables
-var port = 8080;
+var port = 4000;
 var webrtc_clients = [];
 var webrtc_discussions = {};
 
