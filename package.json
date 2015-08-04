@@ -1,0 +1,23 @@
+{
+  "name": "getting_started_with_webrtc",
+  "version": "1.0.0",
+  "description": "getting_started_with_webrtc\r ===========================",
+  "main": "webrtc_signal_server.js",
+  "dependencies": {
+    "websocket": "^1.0.17"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/buildar/getting_started_with_webrtc.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/buildar/getting_started_with_webrtc/issues"
+  },
+  "homepage": "https://github.com/buildar/getting_started_with_webrtc"
+}
