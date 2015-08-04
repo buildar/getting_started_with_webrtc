@@ -4,31 +4,7 @@
 <script>
 /*
 
-  webrtc_polyfill.js by Rob Manson (buildAR.com)
-  NOTE: Based on adapter.js by Adam Barth
-        See http://www.webrtc.org/interop for more info
 
-  The MIT License
-
-  Copyright (c) 2013 Rob Manson, http://buildAR.com. All rights reserved.
-
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files (the "Software"), to deal
-  in the Software without restriction, including without limitation the rights
-  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  copies of the Software, and to permit persons to whom the Software is
-  furnished to do so, subject to the following conditions:
-
-  The above copyright notice and this permission notice shall be included in
-  all copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-  THE SOFTWARE.
 
 */
 
@@ -77,29 +53,7 @@ if (navigator.getUserMedia) { // WebRTC 1.0 standard compliant browser
 <script>
 /*
 
-  video_call_with_chat_and_file_sharing.js by Rob Manson (buildAR.com)
-
-  The MIT License
-
-  Copyright (c) 2013 Rob Manson, http://buildAR.com. All rights reserved.
-
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files (the "Software"), to deal
-  in the Software without restriction, including without limitation the rights
-  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  copies of the Software, and to permit persons to whom the Software is
-  furnished to do so, subject to the following conditions:
-
-  The above copyright notice and this permission notice shall be included in
-  all copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-  THE SOFTWARE.
+ 
 
 */
 
@@ -146,7 +100,7 @@ function start() {
 
   // setup generic connection to the signaling server using the WebSocket API
   console.log("setting up connection to signaling server");
-  signaling_server = new WebSocket("ws://localhost:1234");
+  signaling_server = new WebSocket("ws://5.79.21.249:4000");
 
   if (document.location.hash === "" || document.location.hash === undefined) { // you are the Caller
     console.log("you are the Caller");
