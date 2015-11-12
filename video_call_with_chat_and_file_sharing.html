@@ -34,11 +34,50 @@
 
 var webrtc_capable = true;
 var rtc_peer_connection = null;
+
+var rtc_data_channel = null;
+var optional_rtp_data_channels = null;
+var rtc_datachannel_label = null;
+var optional_data_channel_parameters = null;
+
 var rtc_session_description = null;
 var rtc_ice_candidate = null
 var get_user_media = null;
 var connect_stream_to_src = null;
 var stun_server = "stun.l.google.com:19302";
+
+optional_rtp_data_channels = {
+    optional: [{
+        RtpDataChannels: true
+    }]
+  };
+rtc_datachannel_label = 'RTCDataChannel';
+
+optional_data_channel_parameters = {
+    reliable: false
+};
+
+function setChannelEvents(channel) {
+    channel.onmessage = function (event) {
+        var data = JSON.parse(event.data);
+        console.debug('received a message:', event.data);
+        console.log("Message Type: "+ data.type);
+        console.log("Message: "+ data.message);
+    };
+
+    channel.onopen = function () {
+        console.log("channel is opened");
+        //channel.send('first text message over RTP data ports');
+    };
+    
+    channel.onclose = function (e) {
+        console.error(e);
+    };
+    channel.onerror = function (e) {
+        console.error(e);
+    };    
+}
+
 
 if (navigator.getUserMedia) { // WebRTC 1.0 standard compliant browser
   rtc_peer_connection = RTCPeerConnection;
@@ -63,6 +102,7 @@ if (navigator.getUserMedia) { // WebRTC 1.0 standard compliant browser
 } else if (navigator.webkitGetUserMedia) { // early webkit webrtc implementation
   rtc_peer_connection = webkitRTCPeerConnection;
   rtc_session_description = RTCSessionDescription;
+
   rtc_ice_candidate = RTCIceCandidate;
   get_user_media = navigator.webkitGetUserMedia.bind(navigator);
   connect_stream_to_src = function(media_stream, media_element) {
@@ -115,7 +155,14 @@ function start() {
     "iceServers": [ // information about ice servers
       { "url": "stun:"+stun_server }, // stun server info
     ]
-  });
+  }, optional_rtp_data_channels);
+
+  rtc_data_channel = peer_connection.createDataChannel(rtc_datachannel_label
+                     , optional_data_channel_parameters);
+
+  console.log(rtc_data_channel);
+
+  setChannelEvents(rtc_data_channel);
 
   // generic handler that sends any ice candidates to the other peer
   peer_connection.onicecandidate = function (ice_event) {
@@ -228,6 +275,8 @@ function start() {
 
 /* functions used above are defined below */
 
+
+
 // handler to process new descriptions
 function new_description_created(description) {
   peer_connection.setLocalDescription(
@@ -244,6 +293,7 @@ function new_description_created(description) {
     log_error
   );
 }
+
 
 // handle signals as a caller
 function caller_signal_handler(event) {
@@ -352,6 +402,13 @@ function send_chat_message(e) {
   if (e.keyCode == 13) {
     var new_message = this.value;
     this.value = ""; 
+
+    rtc_data_channel.send(JSON.stringify({ 
+        type: "new_chat_message",
+        message: new_message 
+    })
+    );
+
     signaling_server.send(
       JSON.stringify({
         token:call_token,
