@@ -529,9 +529,31 @@ function send_file(name, file_id, data) {
     document.getElementById("file-img-"+file_id).src = thumbnail_data; 
     send_file_parts("thumbnail", file_id, thumbnail_data);
     send_file_parts("file", file_id, data);
+    send_file_using_dataChannel("file", file_id, data);
   }
   img.src = data;  
 }
+
+
+function send_file_using_dataChannel(file_type, id, data){
+  var chunkLength = 1000;
+  data_part = {};
+
+  if (data.length > chunkLength){
+    data_part.type = "file";
+    data_part.message = data.slice(0, chunkLength);
+  }else{
+    data_part.type = "file"
+    data_part.message = data;
+  }
+
+  rtc_data_channel.send(JSON.stringify(data_part));
+  var remainingDataURL = data.slice(data_part.message.length);
+  if (remainingDataURL.length) setTimeout(function () {
+        send_file_using_dataChannel(null, null, remainingDataURL); // continue transmitting
+  }, 500)
+}
+
 
 // break file into parts and send each of them separately 
 function send_file_parts(type, id, data) {
